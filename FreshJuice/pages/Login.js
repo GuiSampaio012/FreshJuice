@@ -1,26 +1,27 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity,StyleSheet } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
 // import styles from './styles'
 // import axios from 'axios'
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigation } from '@react-navigation/native'
-
+import {app } from './firebaseConfig'
+import jarra from '../assets/jarra.png'
+import bacia from '../assets/bacia.png'
+// import Navbar from '../components/Navbar'
 
 export default function Login() {
-    
+
     const [email, setEmail] = useState('')
     const [senha, setSenha] = useState('')
     const navigation = useNavigation()
-    const auth = getAuth();
-    const btCadastro = () => {
-        navigation.navigate('Cadastro')
-    }
+    const auth = getAuth(app);
 
     const btLogin = () => {
         signInWithEmailAndPassword(auth, email, senha)
             .then((userCredential) => {
                 const user = userCredential.user;
-                navigation.navigate('Home')
+                console.log("green");
+                // navigation.navigate('Home')
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -29,58 +30,88 @@ export default function Login() {
             });
     }
 
-    // const logar = () => {
-    //     // essa funcão LOGA
-    //     axios.post('http://127.0.0.1:8000/auth/jwt/create', {
-    //       email: login,
-    //       password: senha
-    //     }).then((res) =>{ 
-    //         localStorage.setItem('dados',JSON.stringify(res.data))
-    //         navigation.navigate('NavBar')
-    //         // setLogado(true)
-    //     })
-    //     console.log(login)
-    //     console.log(senha)
-    //     console.log('function logar:');
-    // }
-    
-    
-    // const refresh = () => {
-    //     const token = JSON.parse(localStorage.getItem('dados'))
-    //     axios.post('http://127.0.0.1:8000/auth/jwt/refresh', {
-    //       refresh: token.refresh
-    //     }).then(res => localStorage.setItem('dados', JSON.stringify({...token, access: res.data.access})))
-    
-    // }
 
     const styles = StyleSheet.create({
         container: {
             flex: 1,
-            backgroundColor: '#fff',
-            alignItems: 'center',
-            justifyContent: 'center',
+            backgroundColor: "#FCFFEA",
+            alignItems: "center",
+            justifyContent: "center",
         },
-        caixaLogin:{
-            
+        caixaLogin: {
+            borderColor: "#EFBA00",
+            borderWidth: 1,
+            paddingVertical: 10,
+            borderRadius: 30,
+            backgroundColor: "#F6F6F6",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "space-evenly",
+            height: "50%",
+            width: "85%",
+            marginTop:"10%"
         },
-        img:{
-            
+        entrada: {
+            paddingLeft: 10,
+            backgroundColor: "#FFF",
+            width: "65%",
+            height: 45,
+            borderWidth:1,
+            borderRadius: 10,
+            //marginBottom: "6%",
         },
-        caixa:{
-            
+        texto: {
+            fontSize: 40,
+            //marginBottom: "8%"
         },
-        entrada:{
-            
+        textoBtn: {
+            fontSize: 40,
+            fontWeight: "bold",
         },
-        grupoBotoes:{
-        
+        textoBtnVoltar: {
+            fontSize: 40,
+            fontWeight: "bold",
         },
-        texto:{
-           
+        botaoVoltar: {
+            justifyContent: "center",
+            display: "flex",
+            alignItems: "center",
+            width: "13%",
+            height: "5%",
+            backgroundColor: "green",
+            borderRadius: "35%",
+            marginBottom: "8%",
+            marginTop: "3%"
         },
-        botao:{
-            
-        }
+        botao: {
+            marginTop: "10%",
+            justifyContent: "center",
+            display: "flex",
+            alignItems: "center",
+            width: "45%",
+            height: "70%",
+            backgroundColor: "#D5AB30",
+            borderRadius: 10,
+        },
+        imagemCamera: {
+            width: 50,
+            height: 45,
+        },
+        caixaImagens: {
+            marginTop: "4%",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+        },
+        caixaBtn: {
+            width: "70%",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-around",
+        },
     });
 
 
@@ -88,45 +119,44 @@ export default function Login() {
         <View style={styles.container}>
 
             <View style={styles.caixaLogin}>
-                <View>
-                    <img style={styles.img} src={nada}/>
-                </View>
-                <View style={styles.caixa}>
-                    <TextInput
-                        style={styles.entrada}
-                        placeholder='usuario'
-                        keyboardType='email'
-                        value={login}
-                        onChangeText={(e) => setLogin(e)}
-                    />
-                </View>
+                <Text style={styles.texto}> LOGIN </Text>
 
-                <View style={styles.caixa}>
-                    <TextInput
-                        secureTextEntry={true}
-                        style={styles.entrada}
-                        placeholder='password'
-                        keyboardType='text'
-                        value={senha}
-                        onChangeText={(e) => setSenha(e)}
-                    />
-                </View>
+                <TextInput
+                    style={styles.entrada}
+                    placeholder='usuario'
+                    keyboardType='email'
+                    value={email}
+                    onChangeText={(e) => setEmail(e)}
+                />
 
-                <View style={styles.grupoBotoes}>  
+                <TextInput
+                    secureTextEntry={true}
+                    style={styles.entrada}
+                    placeholder='password'
+                    keyboardType='text'
+                    value={senha}
+                    onChangeText={(e) => setSenha(e)}
+                />
+
+                <View style={styles.caixaBtn}>
+                    <TouchableOpacity 
+                        style={styles.botao}
+                        onPress={() => btLogin()}
+                    >
+                        <Text style={styles.textoBtn}>Login</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.botao}
-                        onPress={()=>logar()}
+                        onPress={()=>navigation.navigate("FreshJuice")}
                     >
-                        <Text style={styles.texto}>Login</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.botao}
-                        onPress={()=>btLogin()}
-                    >
-                        <Text style={styles.texto}>Cadastrar</Text>
+                    <Text style={styles.textoBtn}>Voltar</Text>
                     </TouchableOpacity>
                 </View>
-
+    
+            </View>
+            <View style={styles.caixaImagens}>
+                <img src={jarra} />
+                <img src={bacia} />
             </View>
         </View>
     )

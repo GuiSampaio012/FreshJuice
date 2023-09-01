@@ -9,43 +9,43 @@ export default function FreshJuice() {
     const styles = StyleSheet.create({
         fundo:{
             flex: 1,
-            backgroundColor: '#FCFFEA',
-            alignItems: 'center',
-            justifyContent: 'center',
+            backgroundColor: "#FCFFEA",
+            alignItems: "center",
+            justifyContent: "center",
         },
         texto:{
-            color: 'white',
-            fontSize: '20px',
-            fontWeight: 'bold',
+            color: "white",
+            fontSize: 20,
+            fontWeight: "bold",
         },
         botao:{
-            backgroundColor: '#77B725',
-            width:'120px',
-            borderRadius:'10px',
+            backgroundColor: "#77B725",
+            width:120,
+            borderRadius:10,
             display:"flex",
             justifyContent:"center",
-            alignItems:'center',
-            padding:"5px"
+            alignItems:"center",
+            padding:5
         },
         botao:{
-            backgroundColor: '#77B725',
-            width:'120px',
-            borderRadius:'10px',
+            backgroundColor: "#77B725",
+            width:120,
+            borderRadius:10,
             display:"flex",
             justifyContent:"center",
-            alignItems:'center',
-            padding:"5px"
+            alignItems:"center",
+            padding:5
         },
         logo:{
-            width:'350px',
+            width:350,
         },
         grupoBotoes:{
             display:"flex",
             flexDirection:"column",
             justifyContent:"space-around",
             alignItems:"center",
-            width:'100%',
-            height:'10%',
+            width:"100%",
+            height:"10%",
         }
         
     })
@@ -63,7 +63,7 @@ export default function FreshJuice() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.botao}
-                    onPress={()=>()=>{navigate.navigate('Cadastro')}}
+                    onPress={()=>{navigate.navigate('Cadastro')}}
                 >
                     <Text style={styles.texto}>Cadastrar</Text>
                 </TouchableOpacity>

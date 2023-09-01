@@ -54,26 +54,27 @@ export default function Routers(){
     return(
         <NavigationContainer>
             <Pilha.Navigator>
-                {/* para deixar o login sem aparecer a navbar, deixar ele em primeiro */}
-                <Pilha.Screen
-                    name="Cadastro"
-                    component={Cadastro}
-                    options={{ title: 'Cadastro', headerShown: false }}
-                />
-                <Pilha.Screen
-                    name="NavBar"
-                    component={NavBar}
-                    options={{ title: '', headerShown: false }}
-                />
                 <Pilha.Screen
                     name="Login"
                     component={Login}
                     options={{ title: 'Login', headerShown: false }}
                 />
                 <Pilha.Screen
+                    name="Cadastro"
+                    component={Cadastro}
+                    options={{ title: 'Cadastro', headerShown: false }}
+                />
+                {/* para deixar o login sem aparecer a navbar, deixar ele em primeiro */}
+                <Pilha.Screen
                     name="FreshJuice"
                     component={FreshJuice}
                     options={{ title: 'FreshJuice', headerShown: false }}
+                />
+                
+                <Pilha.Screen
+                    name="NavBar"
+                    component={NavBar}
+                    options={{ title: '', headerShown: false }}
                 />
                 <Pilha.Screen
                     name="Home"

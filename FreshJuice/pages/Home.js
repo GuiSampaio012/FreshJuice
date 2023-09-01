@@ -15,31 +15,13 @@ export default function Home() {
     const acesso = localStorage.getItem("dados")
     let chave = ""
 
-    // const refresh = () => window.location.reload(true)
-
-    // useEffect(() => {
-    //     pegartoken()
-    // }, [])
-
-    // useEffect(() =>{
-    //     console.log(chave);
-    //     axios.post(`http://127.0.0.1:8000/auth/jwt/verify/`, {token: chave})
-    //     .then((response) =>{
-    //         if(response.status==200 || response.status==201){
-    //             setLogado(true)
-    //         }
-    //         else{
-    //             setLogado(false) 
-    //             refresh()
-    //         }
-    //     })
-    // },[])
+   
     const styles = StyleSheet.create({
         container: {
             flex: 1,
-            backgroundColor: '#fff',
-            alignItems: 'center',
-            justifyContent: 'center',
+            backgroundColor: "#fff",
+            alignItems: "center",
+            justifyContent: "center",
         },
         campoImagem: {
 

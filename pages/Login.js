@@ -1,34 +1,47 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native'
-// import styles from './styles'
-// import axios from 'axios'
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from './firebaseConfig';
 import { useNavigation } from '@react-navigation/native'
 import {app } from './firebaseConfig'
 import jarra from '../assets/jarra.png'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import bacia from '../assets/bacia.png'
-// import Navbar from '../components/Navbar'
+
+
 
 export default function Login() {
 
     const [email, setEmail] = useState('')
     const [senha, setSenha] = useState('')
     const navigation = useNavigation()
-    const auth = getAuth(app);
+    
 
     const btLogin = () => {
         signInWithEmailAndPassword(auth, email, senha)
             .then((userCredential) => {
                 const user = userCredential.user;
-                console.log("green");
-                navigation.navigate('Home')
+                saveData()
+                navigation.navigate('TabBar')
+                // navigation.navigate('NavBar',{ usuario: user.email })
+
             })
             .catch((error) => {
+                navigation.navigate('TabBar')
                 const errorCode = error.code;
                 const errorMessage = error.message;
                 console.log(errorMessage)
             });    
     }
+    const saveData = async () => {
+        try {
+          await AsyncStorage.setItem("user", email)
+          navigation.navigate('TabBar')
+        } catch (e) {
+          alert('Failed to save the data to the storage'+e)
+        }
+    }
+  
 
 
     const styles = StyleSheet.create({
@@ -120,7 +133,6 @@ export default function Login() {
                 <TextInput
                     style={styles.entrada}
                     placeholder='usuario'
-                    keyboardType='text'
                     value={email}
                     onChangeText={(e) => setEmail(e)}
                 />
@@ -129,7 +141,7 @@ export default function Login() {
                     secureTextEntry={true}
                     style={styles.entrada}
                     placeholder='password'
-                    keyboardType='text'
+            
                     
                     value={senha}
                     onChangeText={(e) => setSenha(e)}
@@ -154,8 +166,6 @@ export default function Login() {
             <View style={styles.caixaImagens}>
             <Image source={jarra}/>
             <Image source={bacia}/>
-                {/* <img src={jarra} />
-                <img src={bacia} /> */}
             </View>
         </View>
     )

@@ -1,43 +1,52 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, PermissionsAndroid} from 'react-native'
 import { useNavigation } from '@react-navigation/native'
-// import axios from 'axios'
+import { decode } from 'base-64';
 import camera from '../assets/camera.png'
-import { ref, getDownloadURL, uploadBytesResumable,uploadString  } from "firebase/storage";
+import { ref, getDownloadURL, uploadBytesResumable,uploadString,putString ,uploadBytes,getStorage} from "firebase/storage";
 import {storage, db, app } from './firebaseConfig'
-import { getAuth,createUserWithEmailAndPassword } from 'firebase/auth';
+import {createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, addDoc} from "firebase/firestore";
-// import * as FileSystem from 'expo-file-system';
 import jarra from '../assets/jarra.png'
 import bacia from '../assets/bacia.png'
 import * as ImagePicker from 'expo-image-picker';
-// import Geolocation from '@react-native-community/geolocation';
 import * as Device from 'expo-device';
 import {DatePicker} from 'react-native-date-picker'
+import axios from 'axios';
+import { auth } from './firebaseConfig';
 
 
 
-const Cadastro = ({ navigation }) => {
-    const navigate = useNavigation()
-    const [email, setEmail] = useState('')
-    const [nome, setNome] = useState('');
-    const [senha, setSenha] = useState('')
-    const [cep, setCep] = useState('');
-    const [longitude, setLongitude] = useState(0)
-    const [latitude, setLatitude] = useState(0)
-    const [longiLate, setLongiLate] = useState()
-    const [n_casa, setN_casa] = useState('');
-    const [data_nascimento, setData_nascimento] = useState('');
-    const [image, setImage] = useState([])
-    const [preview, setPreView] = useState([])
-    const [CurrentRegion, setCurrentRegion] = useState(null);
+const Cadastro = () => {
+      const navigate = useNavigation()
+      const [email, setEmail] = useState('')
+      const [nome, setNome] = useState('');
+      const [senha, setSenha] = useState('')
+      const [cep, setCep] = useState('');
+      const [n_casa, setN_casa] = useState('');
+      const [data_nascimento, setData_nascimento] = useState('');
+      const [image, setImage] = useState([])
+      const [cidade, setCidade] = useState();
+      const [logradouro,setLogradouro] = useState();
+      const [uf,setUf] = useState();
+      const [bairro,setBairro] = useState();
+      const [preview, setPreView] = useState()
+      
+      
+ 
+    if(typeof atob === 'undefined') {
+        global.atob = decode;
+      }
 
-    const auth = getAuth(app);
+
+      
+
+
     const criarUmLogin = () => {
         createUserWithEmailAndPassword(auth, email, senha)
             .then((userCredential) => {
                 const user = userCredential.user;
-                // navigation.navigate('Home', { usuario: user.email })
+                navigate.navigate('Home', { usuario: user.email })
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -47,31 +56,7 @@ const Cadastro = ({ navigation }) => {
             });
     }
 
-    // async function loadInitialPosition(){
-    //     await Geolocation.getCurrentPosition(
-    //         (position) => {
-    //             const {coords} = position
-    //             const {latitude, longitude} = coords
-    //             setLatitude(latitude);
-    //             setLongitude(longitude);
-    //             setLongiLate(`[${longitude}°N,${latitude}°E]`)
-    //             setCurrentRegion({
-    //                 latitude,
-    //                 longitude,
-    //                 latitudeDelta: 0,
-    //                 longitudeDelta: 0.005,
-    //             })
-    //         },
-    //     );
-    // }
-    // useEffect(()=>{
-    //     loadInitialPosition()
-        
-    // },[])
-
-
     const pickImage = async () => {
-        // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
@@ -82,25 +67,22 @@ const Cadastro = ({ navigation }) => {
             
         }
 
-        console.log(result);
-
         if (!result.canceled) {
             setImage(result.assets[0].uri);
-            //   setImageMobal(";base64," + await FileSystem.readAsStringAsync(result.assets[0].uri, { encoding: 'base64' }))
+            setPreView(result.assets[0].uri)
         }
     };
 
     const escolherFotoCamera = async () => {
         let result = ImagePicker.launchCameraAsync({
             allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
         })
-        console.log((await result).assets[0].uri);
         if (!(await result).canceled) {
             setImage((await result).assets[0].uri)
-            console.log(image);
-            // setImageMobal(";base64," + await FileSystem.readAsStringAsync((await result).assets[0].uri, { encoding: 'base64' }))
+            setPreView((await result).assets[0].uri)
         }
-        setImage(result.assets[0].uri)
     }
 
     const escolherFoto = () => {
@@ -121,24 +103,26 @@ const Cadastro = ({ navigation }) => {
         )
     }
 
+    const uriToBlob = (uri) => {
+        return new Promise((resolve, reject) => {
+           const xhr = new XMLHttpRequest()
+           xhr.onload = function () {
+             // return the blob
+             resolve(xhr.response)
+           }
+           xhr.onerror = function () {
+             reject(new Error('uriToBlob failed'))
+           }
+           xhr.responseType = 'blob'
+           xhr.open('GET', uri, true)
+       
+           xhr.send(null)})}
 
-    //######################## Imagem ############################
-    useEffect(() => {
-        if (image) {
-            setPreView(undefined)
-            return
-        }
-        const objectUrl = URL.createObjectURL(preview)
-        setPreView(objectUrl)
-        return () => URL.revokeObjectURL(objectUrl)
-    }, [image])
-
-    //######################## Fim Imagem ########################
-
-    const upload = e => {
+    
+    const upload = async e => {
         e.preventDefault()
 
-        const file = image
+        const file = preview
 
         if (!file) {
             console.log('Faltou imagem!')
@@ -154,41 +138,68 @@ const Cadastro = ({ navigation }) => {
             console.log('Faltou e-mail!')
             return
         }
-
-        if (image == null) return
-
         const storageRef = ref(
             storage,
             `images/${nome}_perfil`
         )
-        // const uploadTask = uploadBytesResumable(storageRef, file)
-        uploadString(storageRef, image, 'data_url').then(() => {
-            console.log('Uploaded a data_url string!');
-          });
 
-        // uploadTask.on('state_changed', snapshot => {
-        //     const progress = Math.round(
-        //         (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        //     )
-        //     setTimeout(() => {
-        //         setProgressoPercent(progress), 1000
-        //     })
-        // })
+        const blobFile = await uriToBlob(preview)
+        uploadBytes(storageRef, blobFile).then(async (snapshot) => {
+            console.log('snapshot', snapshot)
+            const url = await getDownloadURL(storageRef)
+            return url
+          })
+
+
         adicionar()
     }
+
 
     async function adicionar() {
         await addDoc(collection(db, 'usuarios'), {
             data_nascimento: data_nascimento,
             email: email,
-            endereco: longiLate,
             data_nascimento: data_nascimento,
             image: nome+'_perfil',
+            cidade: cidade,
+            bairro: bairro,
+            logradouro: logradouro,
+            uf: uf,
+            cep:cep,
             n_casa: n_casa,
             nome: nome,
         })
         criarUmLogin()
     }
+
+    const buscaCep = () => {
+        if (cep.length ==8) {
+            axios.get(`https://viacep.com.br/ws/${cep}/json/`)
+            .then((res)=>{
+                setCidade(res.data.localidade)
+                setUf(res.data.uf)
+                setLogradouro(res.data.logradouro)
+                setBairro(res.data.bairro)
+                console.log(res.data);
+                
+            }).catch((error)=>{
+                console.log(error);
+            })
+        }
+        else{
+            alert("cep incorreto")
+        }
+ 
+    }
+ 
+
+    useEffect(()=>{
+        if(cep.length >= 8){
+            cep.replace("-","")
+            buscaCep()
+        }
+        
+    },[cep])
 
 
     const styles = StyleSheet.create({
@@ -277,7 +288,6 @@ const Cadastro = ({ navigation }) => {
     return (
         <>
             <View style={styles.container}>
-            {/* <Navbar></Navbar> */}
                 <View style={styles.caixaCadastro}>
 
                     <Text style={styles.texto}>CADASTRO</Text>
@@ -292,7 +302,6 @@ const Cadastro = ({ navigation }) => {
                     <TextInput
                         style={styles.entrada}
                         placeholder='Email'
-                        keyboardType='text'
                         onChangeText={(e) => setEmail(e)}
                     />
 
@@ -301,16 +310,15 @@ const Cadastro = ({ navigation }) => {
                         secureTextEntry={true}
                         style={styles.entrada}
                         placeholder='Senha'
-                        keyboardType='text'
                         onChangeText={(e) => setSenha(e)}
                     />
 
 
-                    {/* <TextInput
+                    <TextInput
                         style={styles.entrada}
                         placeholder='CEP'
                         onChangeText={(e) => { setCep(e) }}
-                    /> */}
+                    />
 
 
                     <TextInput
@@ -320,47 +328,23 @@ const Cadastro = ({ navigation }) => {
                     />
 
 
-                    {/* <TextInput
+                    <TextInput
                         style={styles.entrada}
                         
                         placeholder='Data de Nascimento'
                         onChangeText={(e) => { setData_nascimento(e) }}
-                    /> */}
-                    <DatePicker
-                        modal
-                        open={open}
-                        date={date}
-                        onConfirm={(date) => {
-                        setOpen(false)
-                        setDate(date)
-                        }}
-                        onCancel={() => {
-                        setOpen(false)
-                        }}
                     />
 
-                    {/* <Calendar
-                        hideExtraDays={true}
-                        hideDayNames={true}
-                        // theme={{
-                        //     calendarBackground: '#2195F2',
-                        //     arrowColor: '#fff',
-                        //     monthTextColor: '#fff'
-                        // }}
-                        style={styles.entrada}
-                    /> */}
 
 
                     <View style={styles.caixaImagem}>
                         {
                             image.length == 0?
-                            console.log(image)
+                            <View style={styles.imagem}/>
                             :
                              <Image source={{ uri: image }} style={styles.imagem} />
                         }
-                        {/* <img src={preview} style={styles.imagem} /> */}
                         <TouchableOpacity title="Pick an image from camera roll" onPress={Device.brand != null ? escolherFoto : pickImage}>
-                            {/* <img style={styles.imagemCamera} src={camera} /> */}
                             <Image source={camera} style={styles.imagemCamera}/>
                         </TouchableOpacity>
                     </View>
@@ -370,13 +354,12 @@ const Cadastro = ({ navigation }) => {
                         <TouchableOpacity 
                             style={styles.botao}
                             onPress={upload}
-                            // activeOpacity={0.9}
                         >
                             <Text style={styles.textoBtn}>Cadastrar</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.botao}
-                            onPress={()=>navigation.navigate("FreshJuice")}
+                            onPress={()=>navigate.navigate("FreshJuice")}
                         >
                         <Text style={styles.textoBtn}>Voltar</Text>
                         </TouchableOpacity>

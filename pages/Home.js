@@ -4,11 +4,48 @@ import { useNavigation } from '@react-navigation/native'
 import sucos from '../assets/sucos.png'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import sucoLaranja from '../assets/sucoLaranja.png'
+import { collection, where, getDocs,getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { app, storage} from '../pages/firebaseConfig';
 import NavBar from '../components/NavBar'
 
 
 export default function Home() {
     const navigation = useNavigation()
+    const [produtos,setProdutos] = useState()
+    const [imageUrls, setImageUrls] = useState([]);
+    
+
+    const db = getFirestore(app)
+
+
+    useEffect(()=>{
+        pegarProdutos()
+    },[])
+
+    const pegarProdutos = async() =>{
+        let listaProdutos = []
+        let listacomImages = []
+        var listaUrl = []
+        const querySnapshot = await getDocs(collection(db, "produtos"));
+        querySnapshot.forEach((doc) => {
+        listaProdutos.push(doc.data())
+        listacomImages.push(doc.data().foto)
+  
+        })
+
+        for (let index = 0; index < listacomImages.length; index++) {
+            const reference = ref(storage,"produtos/"+listacomImages[index]+".png") 
+            const URL = await getDownloadURL(reference)
+            listaUrl.push(URL)
+        }
+
+        setImageUrls(listaUrl)
+        setProdutos(listaProdutos)
+    }
+
+
+    
    
 
 
@@ -20,21 +57,13 @@ export default function Home() {
             alignItems: "center",
 
         },
-        abaItens: {
-            backgroundColor: "#F6F6F6",
-            width: "100%",
-            height: "72%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-around",
-            flexDirection: "column",
-        },
         caixaItens: {
             width: "100%",
-            height: "45%",
+            height: "58%",
             display: "flex",
+            flexWrap:"wrap",
             alignItems: "center",
-            justifyContent: "space-around",
+            justifyContent: "space-evenly",
             flexDirection: "row"
         },
         itens: {
@@ -42,9 +71,10 @@ export default function Home() {
             borderColor: "#D5AB30",
             borderWidth: 1,
             width: "45%",
-            height:"100%",
+            height:"60%",
             borderRadius:20,
             alignItems:"center",
+            marginBottom:8,
             
         },
         imagem: {
@@ -75,65 +105,42 @@ export default function Home() {
         <View style={styles.container}>
             <NavBar/>
             <Image style={styles.imagem} source={sucos}/>
-            <View style={styles.abaItens}>
-                <ScrollView></ScrollView>
+            
+             
                 
-                <View style={styles.caixaItens}>
-                    {/* <TouchableOpacity style={styles.itens} onPress={() => navigation.navigate('Transferencia')}>
+                <View style={styles.caixaItens} >
+                    {
+                        Array.isArray(produtos)?
 
-                    </TouchableOpacity> */}
+                           produtos.map((prod,index)=>{
+                            return(
+                                <TouchableOpacity style={styles.itens} key={index} onPress={()=>navigation.navigate('Produtos',{item: prod, image:imageUrls[index]})}>
+                                    <Image style={styles.imagemProduto} source={{uri:imageUrls[index]}}/>
+                                    <View>
+                                        <Text style={styles.textoSuco}>{prod.nome}</Text>
+                                    </View>
+            
+                                    <View>
+                                        <Text style={styles.textoPreco}>R$ {prod.preco}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                                )
+                            })
 
-                    <TouchableOpacity style={styles.itens}>
-                        <Image style={styles.imagemProduto} source={sucoLaranja}/>
-                        <View>
-                            <Text style={styles.textoSuco}> Suco De Laranja</Text>
-                        </View>
 
-                        <View>
-                            <Text style={styles.textoPreco}> R$ 3,50</Text>
-                        </View>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity style={styles.itens}>
-                        <Image style={styles.imagemProduto} source={sucoLaranja}/>
-                        <View>
-                            <Text style={styles.textoSuco}> Suco De Maça</Text>
-                        </View>
-
-                        <View>
-                            <Text style={styles.textoPreco}> R$ 3,50</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.caixaItens}>
-
-                    <TouchableOpacity style={styles.itens}>
-                        <Image style={styles.imagemProduto} source={sucoLaranja}/>
-                        <View>
-                            <Text style={styles.textoSuco}> Suco De Limão</Text>
-                        </View>
-
-                        <View>
-                            <Text style={styles.textoPreco}> R$ 3,50</Text>
+                            :
+                            <TouchableOpacity style={styles.itens}>
+                        <View >
+                            <Text style={styles.textoSuco}> Carregando informações....</Text>
                         </View>
                     </TouchableOpacity>
+                    }
+                    </View>
 
-                    <TouchableOpacity style={styles.itens}>
-                        <Image style={styles.imagemProduto} source={sucoLaranja}/>
-                        <View>
-                            <Text style={styles.textoSuco}> Suco De Melencia</Text>
-                        </View>
 
-                        <View>
-                            <Text style={styles.textoPreco}> R$ 3,50</Text>
-                        </View>
-                    </TouchableOpacity>
-
-                </View>
 
             </View>
-        </View>
+        
 
     )
 }

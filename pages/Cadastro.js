@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, PermissionsAndroid} from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert} from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { decode } from 'base-64';
 import camera from '../assets/camera.png'

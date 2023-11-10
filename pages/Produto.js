@@ -1,12 +1,38 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
-import sucoLaranja from '../assets/sucoLaranja.png'
 import NavBar from '../components/NavBar'
+import Suco from '../assets/sucoLaranja.png'
 
-export default function Produto() {
+
+
+
+export default function Produto({route}) {
+    const { item,image } = route.params;
     const [unidade, setUnidade] = useState(0)
     const navigation = useNavigation()
+
+
+    async function comprar (){
+        var carrinho = []
+        const produto = {nome: item.nome,descricao:item.descricao,litros:item.litros,preco:item.preco,imagem:image,quantidade:unidade}
+        console.log(produto);
+
+        if (await AsyncStorage.getItem("carrinho")) {
+            carrinho = JSON.parse(await AsyncStorage.getItem("carrinho"))
+            carrinho.push(produto)
+            await AsyncStorage.setItem("carrinho", JSON.stringify(carrinho))
+        }
+        else{
+            carrinho.push(produto)
+            await AsyncStorage.setItem("carrinho", JSON.stringify(carrinho))
+        }
+        
+    }
+
+
+
 
 
     const styles = StyleSheet.create({
@@ -50,12 +76,9 @@ export default function Produto() {
             height:"45%",
         },
         image: {
-            borderTopLeftRadius:20,
-            borderTopRightRadius:20,
-            borderBottomLeftRadius:20,
-            borderBottomRightRadius:20,
             width: "100%",
-            height: "100%"
+            height: "100%",
+            borderRadius:20,
         },
         tituloProd:{
             textAlign:'center',
@@ -126,40 +149,84 @@ export default function Produto() {
             <NavBar/>
             
             <View style={styles.abaItem}>
-            
+            {
+                item?
+                <>
                 <View style={styles.caixaItem}>
 
                     <TouchableOpacity style={styles.item}>
-                        <Image style={styles.image} source={sucoLaranja}/>
+                        <Image style={styles.image} source={{uri:image}}/>
                     </TouchableOpacity>
 
                     <View style={styles.descItem}>
-                        <Text style={styles.tituloProd}> Suco De Laranja</Text>
+                        <Text style={styles.tituloProd}> {item.nome}</Text>
 
-                        <Text style={styles.descProd}> Nosso suco de laranja é feito por laranjas selecionadas e cultivadas na plantação do Carlinhos </Text>
+                        <Text style={styles.descProd}>{item.descricao}</Text>
                         
                         <View style={styles.caixaBotaoTitulo}>
-                            <TouchableOpacity style={styles.botao}>
+                            <TouchableOpacity style={styles.botao} onPress={()=> unidade>0?comprar():alert("adicione uma unidade")}>
                                 <Text style={styles.comprar}>Comprar</Text>
 
                             </TouchableOpacity>
-                            <Text style={styles.preco}> R$ 29,00 </Text>
+                            <Text style={styles.preco}> R$ {item.preco} </Text>
                         </View>
                     </View>
                 </View>
-                <View style={styles.tamanhoQuantidade}>
+                    <View style={styles.tamanhoQuantidade}>
                         <View style={styles.caixaQuantidade}>
-                            <TouchableOpacity style={styles.botaoQuantidade}>
+                            <TouchableOpacity style={styles.botaoQuantidade} onPress={()=> unidade<=0? setUnidade(0):setUnidade(unidade-1)}>
                                 <Text style={styles.icones}>-</Text>
                             </TouchableOpacity>
 
                             <Text style={styles.quantidade}>{unidade}</Text>
 
-                            <TouchableOpacity style={styles.botaoQuantidade}>
+                            <TouchableOpacity style={styles.botaoQuantidade} onPress={()=> setUnidade(unidade+1)}>
                                 <Text style={styles.icones}>+</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
+                
+                
+                </>
+                :
+                <>
+                <View style={styles.caixaItem}>
+
+                <TouchableOpacity style={styles.item}>
+                    <Image style={styles.image} />
+                </TouchableOpacity>
+
+                <View style={styles.descItem}>
+                    <Text style={styles.tituloProd}> {item.nome}</Text>
+
+                    <Text style={styles.descProd}>{item.descricao}</Text>
+                    
+                    <View style={styles.caixaBotaoTitulo}>
+                        <TouchableOpacity style={styles.botao} onPress={()=> unidade>0?comprar():alert("adicione uma unidade")}>
+                            <Text style={styles.comprar}>Comprar</Text>
+
+                        </TouchableOpacity>
+                        <Text style={styles.preco}> R$ ---- </Text>
+                    </View>
+                </View>
+            </View>
+                <View style={styles.tamanhoQuantidade}>
+                    <View style={styles.caixaQuantidade}>
+                        <TouchableOpacity style={styles.botaoQuantidade} onPress={()=> unidade<=0? setUnidade(0):setUnidade(unidade-1)}>
+                            <Text style={styles.icones}>-</Text>
+                        </TouchableOpacity>
+
+                        <Text style={styles.quantidade}>{unidade}</Text>
+
+                        <TouchableOpacity style={styles.botaoQuantidade} onPress={()=> setUnidade(unidade+1)}>
+                            <Text style={styles.icones}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                </>
+            
+            }
+                
 
             </View>
         </View>

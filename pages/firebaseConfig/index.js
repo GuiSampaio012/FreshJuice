@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import { initializeApp } from "firebase/app";
 import {getAuth, signInWithEmailAndPassword, signOut} from "firebase/auth";
 import {getFirestore, query, getDocs, collection, where, addDoc,} from "firebase/firestore";
@@ -17,8 +18,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+
 const logout = () => {
+  const navigation = useNavigation();
   signOut(auth);
+  navigation.navigate('FreshJuice')
+
 };
 export {
   auth,

@@ -7,13 +7,16 @@ import Home from './pages/Home';
 import Cadastro from './pages/Cadastro';
 import FreshJuice from './pages/FreshJuice';
 import Produto from './pages/Produto';
+import Carrinho from './pages/Carrinho';
+import { logout } from './pages/firebaseConfig';
+import { Index } from 'firebase/firestore';
 
 
 const Pilha = createNativeStackNavigator()
 const Nav = createBottomTabNavigator()
 
 function NavBar2() {
-    
+
 
     return (
         <Nav.Navigator
@@ -27,18 +30,37 @@ function NavBar2() {
                 tabBarActiveTintColor: '#fff',
                 tabBarInactiveTintColor: '#fff',
             }}
-        >
-            <Nav.Screen name="Home" component={Home}
+            >
+                <Nav.Screen name="Home" component={Home}
+                    options={{
+                        headerShown: false,
+                        tabBarIcon: ({ size, color }) => (
+                            <Feather name="home" size={size} color={'#fff'} />
+                        ),
+                        unmountOnBlur: true
+                    }}
+                />
+                <Nav.Screen name="Produtos" component={Produto}
+                    options={{
+                        headerShown: false,
+                        tabBarButton: () => null,
+                        unmountOnBlur: true,
+                      }}
+                />
+              <Nav.Screen name="Pedidos" component={Carrinho}
                 options={{
                     headerShown: false,
                     tabBarIcon: ({ size, color }) => (
-                        <Feather name="home" size={size} color={'#fff'} />
+                        <Feather name="truck" size={size} color={'#fff'} />
                     ),
                     unmountOnBlur: true
                 }}
-            />
+            /> 
 
-            <Nav.Screen name="Compras" component={Produto}
+
+
+            
+            <Nav.Screen name="Carrinho" component={Carrinho}
                 options={{
                     headerShown: false,
                     tabBarIcon: ({ size, color }) => (
@@ -47,6 +69,18 @@ function NavBar2() {
                     unmountOnBlur: true
                 }}
             />
+
+            <Nav.Screen
+            name="LogOut" children={()=>logout()}
+            options={({ navigation }) => ({
+                headerShown: false,
+                tabBarIcon: ({ size, color }) => (
+                <Feather name="log-out" size={size} color={color} />
+                ),
+                unmountOnBlur: true,
+            })}
+            />
+
 
         </Nav.Navigator>
     )
@@ -72,21 +106,27 @@ export default function Routers() {
                     options={{ title: 'Cadastro', headerShown: false }}
                 />
                 {/* para deixar o login sem aparecer a navbar, deixar ele em primeiro */}
-                 <Pilha.Screen
+                <Pilha.Screen
                     name="TabBar"
                     component={NavBar2}
                     options={{ title: '', headerShown: false }}
                 />
-                
+
                 <Pilha.Screen
                     name="Home"
                     component={Home}
                     options={{ title: 'Home', headerShown: false, unmountOnBlur: true }}
                 />
-                
+
                 <Pilha.Screen
                     name="Produto"
                     component={Produto}
+                    options={{ title: 'Produto', headerShown: false, unmountOnBlur: true }}
+                />
+
+                <Pilha.Screen
+                    name="Carrinho"
+                    component={Carrinho}
                     options={{ title: 'Produto', headerShown: false, unmountOnBlur: true }}
                 />
 
